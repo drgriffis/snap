@@ -12,6 +12,9 @@ void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
   for (TWNet::TNodeI NI = InNet->BegNI(); NI < InNet->EndNI(); NI++) {
     NIdsV.Add(NI.GetId());
   }
+
+  TFOut corpus("corpus.txt");
+
   //Generate random walks
   int64 AllWalks = (int64)NumWalks * NIdsV.Len();
   WalksVV = TVVec<TInt, int64>(AllWalks,WalkLen);
@@ -26,9 +29,16 @@ void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
       }
       TIntV WalkV;
       SimulateWalk(InNet, NIdsV[j], WalkLen, Rnd, WalkV);
+
+      corpus.PutInt(NIdsV[j]);
+
       for (int64 k = 0; k < WalkV.Len(); k++) { 
         WalksVV.PutXY(i*NIdsV.Len()+j, k, WalkV[k]);
+        corpus.PutCh(' ');
+        corpus.PutInt(WalkV[k]);
       }
+
+      corpus.PutLn();
       WalksDone++;
     }
   }
@@ -37,9 +47,9 @@ void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
     fflush(stdout);
   }
   //Learning embeddings
-  if (!OutputWalks) {
-    LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);
-  }
+  //if (!OutputWalks) {
+  //  LearnEmbeddings(WalksVV, Dimensions, WinSize, Iter, Verbose, EmbeddingsHV);
+  //}
 }
 
 void node2vec(PWNet& InNet, const double& ParamP, const double& ParamQ,
